@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mind Your Prompt .</title>
+<link rel="icon" type="image/png" sizes="64x64" href="assets/icons/favicon.png">
+<link rel="stylesheet" href="assets/css/tokens.css">
+<link rel="stylesheet" href="assets/css/sidebar.css">
+<link rel="stylesheet" href="assets/css/stage-base.css">
+<link rel="stylesheet" href="assets/css/editor.css">
+<link rel="stylesheet" href="assets/css/preferences.css">
+<link rel="stylesheet" href="assets/css/stage.css">
+<link rel="stylesheet" href="assets/css/scrollbars.css">
+<link rel="stylesheet" href="assets/css/project-list.css">
+</head>
+<body>
+<main class="app">
+  <aside class="side">
+    <div class="top">
+      <div class="logo"><span>M</span>ind <span>Y</span>our <span>P</span>rompt .</div>
+      <span class="byHotspot" aria-hidden="true"><span>By Ellis</span></span>
+      <span class="statusDot" id="statusDot" role="status" aria-live="polite"></span>
+      <div class="sub">Mind Your Prompt says: keep your prompts in line. Park them here.</div>
+    </div>
+    <div class="tools"><input id="search" placeholder="搜索标题" aria-label="搜索标题"><div class="filterBar"><button class="filterBtn on" type="button" data-filter="all">全部</button><button class="filterBtn" type="button" data-filter="text">文生图</button><button class="filterBtn" type="button" data-filter="image">图生图</button></div></div>
+    <div class="list" id="list"></div>
+    <div class="sideBottom"><div class="sideStats"><div><strong id="count">0</strong><span>项目</span></div><div><strong>DATA</strong><span>本地</span></div></div><button class="lime glow" id="newBtn"><span class="newWord">NEW</span> <span>Prompt</span></button></div>
+  </aside>
+
+  <section class="main">
+    <div class="stage">
+      <img id="heroImg" alt="" style="display:none">
+      <div class="stageBackdropSolid" aria-hidden="true"></div>
+      <div class="stageGridView" id="stageGridView" aria-label="网格预览"></div>
+      <div class="heroText">
+        <div class="heroDraftHint" id="heroDraftHint"><span class="heroDraftHintAccent" id="heroDraftHintAccent">请</span><span id="heroDraftHintRest">在右侧编辑你的标题提示词和图片</span></div>
+        <div class="eyebrow">AIGC Prompt Library</div>
+        <h1><span id="heroTitle">MYP</span><div class="heroBrand" id="heroBrand"><span>M</span>ind <span>Y</span>our <span>P</span>rompt .</div><span class="outline">PROMPT</span></h1>
+      </div>
+      <div class="saveToast copyToast" id="copyToast" role="status" aria-live="polite"><i>✓</i><span>提示词已复制</span></div>
+      <button type="button" class="lime glow stageModeBtn" id="stageModeBtn" aria-label="切换预览模式" title="切换预览模式"><svg class="stageModeIcon" viewBox="0 0 36 18" aria-hidden="true"><g class="modeSingle modeIcon"><rect class="singleFrame" x="4.0" y="2.2" width="7.2" height="13.6"/></g><g class="modeGrid modeIcon"><rect class="gridCell" x="18.6" y="2.6" width="4.2" height="4.2"/><rect class="gridCell" x="25.8" y="2.6" width="4.2" height="4.2"/><rect class="gridCell" x="18.6" y="10.8" width="4.2" height="4.2"/><rect class="gridCell" x="25.8" y="10.8" width="4.2" height="4.2"/></g></svg><span id="stageModeLabel">网格</span></button>
+      <button type="button" class="lime glow stageCopyBtn" id="stageCopyBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1"/></svg><span>复制提示词</span></button>
+    </div>
+
+    <form class="editor" id="form">
+      <div class="bar">
+        <div class="barTitle">Prompt Library <span class="themeSwitch" id="themeToggle" role="switch" tabindex="0" aria-checked="false" aria-label="切换主题"><span class="switchTrack"><span class="switchThumb"></span></span><span class="switchIcon"><svg class="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="#f5a623" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg><svg class="moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></span></span> <span class="accentWrap"><span class="accentBtn" id="accentBtn" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false" aria-label="切换强调色"><span class="accentBtnInner" id="accentBtnInner"></span></span></span> <span class="langBtn" id="langBtn" role="button" tabindex="0" aria-label="切换语言">中</span></div>
+        <div class="actions">
+          <div class="saveToast" id="saveToast" role="status" aria-live="polite"><i>✓</i><span>该项目已保存</span></div>
+          <button type="submit" class="lime glow">保存</button>
+        </div>
+      </div>
+
+      <div class="titleRow"><label class="field titleField"><span class="label">标题</span><input id="title" autocomplete="off" placeholder="请输入你的标题"></label><div class="modelWrap"><label class="label" for="modelName">模型</label><input id="modelName" autocomplete="off" placeholder="模型名"><div class="modelDrop" id="modelDrop" role="listbox"></div></div></div>
+      <div class="field promptField" id="promptField"><label class="label" for="prompt">提示词</label><div class="promptWrap"><textarea class="prompt" id="prompt" spellcheck="false" placeholder="请输入你的提示词"></textarea><button type="button" class="promptExpandBtn" id="promptExpandBtn" aria-label="展开提示词" aria-expanded="false"><span class="tri up"></span><span class="tri down"></span></button></div></div>
+
+      <div class="field">
+        <span class="label">原图</span>
+        <input id="sourceInput" type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png" multiple hidden>
+        <div class="uploadBox sourceBox" id="sourceBox" role="button" tabindex="0" aria-labelledby="sourceTitle">
+          <img id="sourcePreview" alt="">
+          <div class="uploadText">
+            <span class="uploadIcon" aria-hidden="true"></span>
+            <b id="sourceTitle">点击上传原图</b>
+            <span id="sourceHint">JPG / PNG -> DATA/images</span>
+            <small id="sourceName">未选择原图</small>
+          </div>
+        </div>
+        <div class="imageStrip" id="sourceStrip"></div>
+      </div>
+
+      <div class="field">
+        <span class="label">生成图</span>
+        <input id="imageInput" type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png" multiple hidden>
+        <div class="uploadBox" id="uploadBox" role="button" tabindex="0" aria-labelledby="uploadTitle">
+          <img id="uploadPreview" alt="">
+          <div class="uploadText">
+            <span class="uploadIcon" aria-hidden="true"></span>
+            <b id="uploadTitle">点击上传图片</b>
+            <span id="uploadHint">JPG / PNG -> DATA/images</span>
+            <small id="imageName">未选择图片</small>
+          </div>
+        </div>
+        <div class="imageStrip" id="imageStrip"></div>
+      </div>
+
+      <div class="footerBtns">
+        <button type="button" class="ghost" id="clearImageBtn">清空生成图</button>
+        <button type="button" class="ghost" id="clearSourceBtn">清空原图</button>
+        <button type="button" class="ghost danger" id="deleteBtn">删除当前项目</button>
+      </div>
+
+    </form>
+  </section>
+</main>
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="图片预览"><button type="button" class="lightboxNav prev" id="lightboxPrev" aria-label="上一张"><svg viewBox="0 0 54 54" aria-hidden="true"><circle cx="27" cy="27" r="25"/><polyline points="31 18 22 27 31 36"/></svg></button><button type="button" class="lightboxNav next" id="lightboxNext" aria-label="下一张"><svg viewBox="0 0 54 54" aria-hidden="true"><circle cx="27" cy="27" r="25"/><polyline points="23 18 32 27 23 36"/></svg></button><button type="button" id="lightboxClose" aria-label="关闭预览">X</button><button type="button" class="lime" id="lightboxDownload">下载</button><img id="lightboxImg" alt=""></div>
+
+<script src="assets/js/canvas-freeze.js"></script>
+<script src="assets/js/storage.js"></script>
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/overlay-scrollbar.js"></script>
+<script src="assets/js/app/core.js"></script>
+<script src="assets/js/app/prompt-model.js"></script>
+<script src="assets/js/app/persistence.js"></script>
+<script src="assets/js/app/project-list.js"></script>
+<script src="assets/js/app/stage-layout.js"></script>
+<script src="assets/js/app/stage-transition.js"></script>
+<script src="assets/js/app/stage-grid.js"></script>
+<script src="assets/js/app/editor.js"></script>
+<script src="assets/js/app/preferences.js"></script>
+<script src="assets/js/app/bootstrap.js"></script>
+</body>
+</html>

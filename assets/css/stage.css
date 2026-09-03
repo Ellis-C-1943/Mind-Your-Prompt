@@ -1,0 +1,537 @@
+/* Fixed desktop canvas
+   Resizing the browser crops the canvas instead of stacking, squeezing,
+   scaling, or repositioning UI elements. */
+
+html,body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Stage typography lock
+   Stage labels use fixed canvas sizing; browser resizing only crops the canvas. */
+
+/* Stage title theme transition */
+
+#heroTitle,.heroTitleLine,.outline {
+  -webkit-text-stroke-color: var(--outline-stroke);
+  transition: -webkit-text-stroke-color .8s cubic-bezier(.25,.46,.45,.94),color .8s cubic-bezier(.25,.46,.45,.94),stroke .8s cubic-bezier(.25,.46,.45,.94);
+}
+
+.heroText .heroBrand,.heroText .heroBrand span {
+  transition: color .8s cubic-bezier(.25,.46,.45,.94);
+}
+
+/* ── Stage mode system: single owner / isolated motion ──
+   Ownership:
+   1) Grid selection only moves .stageGridActiveFrame.
+   2) Mode switch zoom is owned only by .stageModeGhost.
+   3) Geometry animation is isolated inside the contained ghost; surrounding layout stays fixed.
+   4) Title, eyebrow, image, and grid are independent layers. */
+
+.stage.gridMode {
+  cursor: default;
+}
+
+.stage.gridMode,.stage.stageModeAnimatingToGrid,.stage.stageModeAnimatingToSingle {
+  background: var(--bg-stage-grid);
+}
+
+.stage #heroImg {
+  z-index: 0;
+  will-change: opacity,filter,transform;
+  transform: translateZ(0);
+  transition: opacity .18s ease,filter .2s ease,background-color .8s cubic-bezier(.25,.46,.45,.94);
+}
+
+.stage.gridMode #heroImg {
+  opacity: .82;
+  pointer-events: none;
+  filter: blur(18px) contrast(1.02) brightness(.56);
+  transform: scale(1.065) translateZ(0);
+}
+
+.stage.stageModeAnimating #heroImg {
+  opacity: .24;
+  pointer-events: none;
+  filter: blur(18px) contrast(1.02) brightness(.52);
+  transform: scale(1.065) translateZ(0);
+  transition: opacity .4s ease,filter .4s ease,transform .4s ease;
+}
+
+[data-theme="light"] .stage.gridMode #heroImg {
+  filter: blur(18px) contrast(1.02) brightness(1.02);
+}
+
+[data-theme="light"] .stage.stageModeAnimating #heroImg {
+  filter: blur(18px) contrast(1.02) brightness(.96);
+}
+
+.stage:not(.gridMode):not(.stageModeAnimatingToGrid) #heroImg {
+  opacity: var(--stage-content-opacity,1);
+  filter: contrast(1.08);
+  transform: translateZ(0);
+}
+
+.stageBackdropSolid {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  contain: paint;
+  height: 330px;
+  z-index: 1;
+  opacity: var(--stage-shade-opacity);
+  background-color: var(--bg-stage);
+  -webkit-mask-image: linear-gradient(to top,rgba(0,0,0,.94) 0%,rgba(0,0,0,.80) 22%,rgba(0,0,0,.58) 46%,rgba(0,0,0,.28) 72%,transparent 100%);
+  mask-image: linear-gradient(to top,rgba(0,0,0,.94) 0%,rgba(0,0,0,.80) 22%,rgba(0,0,0,.58) 46%,rgba(0,0,0,.28) 72%,transparent 100%);
+  transition: opacity var(--stage-zoom-ms) var(--stage-ease),background-color .8s cubic-bezier(.25,.46,.45,.94);
+}
+
+.stage.gridMode .stageBackdropSolid,.stage.stageModeAnimatingToGrid .stageBackdropSolid {
+  opacity: 0;
+}
+
+.stage.gridMode .stageBackdropSolid,.stage.stageModeAnimatingToGrid .stageBackdropSolid,.stage.stageModeAnimatingToSingle .stageBackdropSolid {
+  background-color: var(--bg-stage-grid);
+}
+
+/* The fixed shade keeps one geometry in both modes; the zoom ghost mirrors its opacity. */
+
+/* The bottom shade is owned only by .stageBackdropSolid. Keeping it out of
+   .heroText prevents title-height changes from resizing the shade mid-transition. */
+
+.stageGridView {
+  position: absolute;
+  z-index: 2;
+  inset: 18px 14px auto 24px;
+  --grid-bottom-fade-opacity: 1;
+  height: calc(var(--stage-cut-y,390px) - 18px);
+  padding: 12px 24px 76px 18px;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 12px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-gutter: stable;
+  scrollbar-color: var(--grid-scroll-thumb) transparent;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateZ(0);
+  contain: layout paint;
+  -webkit-mask-image: linear-gradient(to bottom,#000 0%,#000 calc(100% - 96px),rgba(0,0,0,.84) calc(100% - 68px),rgba(0,0,0,.32) calc(100% - 34px),transparent 100%);
+  mask-image: linear-gradient(to bottom,#000 0%,#000 calc(100% - 96px),rgba(0,0,0,.84) calc(100% - 68px),rgba(0,0,0,.32) calc(100% - 34px),transparent 100%);
+  transition: opacity .16s ease,visibility 0s linear .16s,background-color .8s cubic-bezier(.25,.46,.45,.94),border-color .8s cubic-bezier(.25,.46,.45,.94);
+}
+
+/* The grid bottom softness is produced only by the view mask. A separate
+   backdrop-filter layer created a visible tinted rectangle over the last card. */
+
+.stageGridView.isAtBottom {
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+.stageGridView::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 999px;
+}
+
+.stageGridView::-webkit-scrollbar-thumb {
+  background: var(--grid-scroll-thumb);
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background-clip: padding-box;
+}
+
+.stageGridView::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+  border-color: transparent;
+}
+
+.stage.gridMode .stageGridView,.stage.stageModeAnimatingToSingle .stageGridView,.stage.stageModeAnimatingToGrid .stageGridView {
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity .16s ease,background-color .8s cubic-bezier(.25,.46,.45,.94),border-color .8s cubic-bezier(.25,.46,.45,.94);
+}
+
+.stage.gridMode .stageGridView {
+  opacity: 1;
+}
+
+.stage.stageModeAnimatingToSingle .stageGridView {
+  opacity: .72;
+  pointer-events: none;
+}
+
+.stage.stageModeAnimatingToGrid .stageGridView {
+  opacity: 1;
+  pointer-events: none;
+}
+
+.stage.stageModeAnimating .stageGridView {
+  pointer-events: none;
+}
+
+/* Keep the grid bottom soft mask alive throughout grid→single. Removing it as soon as gridMode clears exposes the last image for one compositor frame before the grid fade finishes. */
+
+.stage:not(.gridMode):not(.stageModeAnimatingToGrid):not(.stageModeAnimatingToSingle) .stageGridView {
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+.stageGridCard {
+  position: relative;
+  width: var(--card-w,168px);
+  height: var(--card-h,168px);
+  flex: 0 0 auto;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  border-radius: 4px;
+  background: transparent;
+  overflow: hidden;
+  display: block;
+  box-shadow: none;
+  cursor: pointer;
+  transform-origin: center;
+  touch-action: none;
+  will-change: transform,box-shadow;
+  transition: background-color .8s cubic-bezier(.25,.46,.45,.94),border-color .22s ease,box-shadow .22s ease,filter .22s ease,transform .18s ease,opacity .16s ease;
+}
+
+.stageGridCard img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: transparent;
+  display: block;
+  filter: contrast(1.04);
+  transform: scale(1.002) translateZ(0);
+  transition: filter .18s ease,background-color .8s cubic-bezier(.25,.46,.45,.94);
+}
+
+.stageGridCard:hover {
+  border-color: transparent;
+  box-shadow: 0 0 0 1px color-mix(in srgb,var(--accent) 38%,transparent),0 0 13px 2px color-mix(in srgb,var(--accent) 20%,transparent);
+  transform: scale(1.018);
+}
+
+.stageGridCard.on {
+  border-color: transparent;
+  box-shadow: none;
+  transform: none;
+}
+
+.stageGridCard.on:hover {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Ccircle cx='11' cy='11' r='7.5' fill='none' stroke='%23fafafa' stroke-width='2.2'/%3E%3Cline x1='16.3' y1='16.3' x2='24' y2='24' stroke='%23fafafa' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E") 11 11,zoom-in;
+  transform: scale(1.018);
+}
+
+.stageGridCard.dragging {
+  z-index: 5;
+  opacity: .88;
+  filter: saturate(1.08);
+  box-shadow: 0 0 0 1px color-mix(in srgb,var(--accent) 65%,transparent),0 0 22px 6px color-mix(in srgb,var(--accent) 34%,transparent);
+  cursor: grabbing;
+  transition: box-shadow .22s ease,filter .22s ease,opacity .16s ease;
+}
+
+.stageGridCard.dragGhost {
+  opacity: .38;
+  transform: scale(.94);
+}
+
+.stageGridPlaceholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  text-align: center;
+  color: var(--text-muted);
+  font-family: "Microsoft YaHei","PingFang SC","Hiragino Sans GB","Noto Sans SC",system-ui,sans-serif;
+  font-size: 12px;
+  line-height: 1.35;
+  background: linear-gradient(135deg,color-mix(in srgb,var(--accent) 7%,transparent),transparent 58%);
+}
+
+.stageGridEmpty {
+  width: 100%;
+  min-height: 210px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 13px;
+  letter-spacing: .04em;
+  text-align: center;
+  border: 1px dashed var(--border-light);
+  border-radius: 4px;
+  background: color-mix(in srgb,var(--bg-surface) 76%,transparent);
+  transition: background-color .8s cubic-bezier(.25,.46,.45,.94),border-color .8s cubic-bezier(.25,.46,.45,.94),color .8s cubic-bezier(.25,.46,.45,.94);
+}
+
+.stageGridActiveFrame {
+  position: absolute;
+  z-index: 6;
+  pointer-events: none;
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  box-shadow: 0 0 0 1px color-mix(in srgb,var(--accent) 48%,transparent),0 0 17px 3px color-mix(in srgb,var(--accent) 29%,transparent);
+  opacity: 0;
+  transform: translateZ(0);
+  will-change: left,top,width,height,opacity,transform;
+  transition: left .30s cubic-bezier(.22,1,.36,1),top .30s cubic-bezier(.22,1,.36,1),width .30s cubic-bezier(.22,1,.36,1),height .30s cubic-bezier(.22,1,.36,1),opacity .16s ease,box-shadow .22s ease,transform .18s ease;
+}
+
+.stageGridActiveFrame.noAnim {
+  transition: none;
+}
+
+/* When the selected card is hovered, scale the selection frame together with the
+   card (both use scale(1.018) around center) so the glow stays glued to the card
+   edge — no second, disconnected accent ring. Only the slight zoom remains. */
+
+.stage:has(.stageGridView .stageGridCard.on:hover) .stageGridActiveFrame {
+  transform: translateZ(0) scale(1.018);
+}
+
+.stage:not(.gridMode):not(.stageModeAnimatingToGrid) .stageGridActiveFrame,.stage.stageModeAnimatingToSingle .stageGridActiveFrame {
+  opacity: 0 !important;
+}
+
+.stageModeGhost {
+  position: absolute;
+  display: block;
+  overflow: hidden;
+  max-width: none;
+  max-height: none;
+  z-index: 12;
+  pointer-events: none;
+  transform-origin: 50% 50%;
+  backface-visibility: hidden;
+  contain: layout paint;
+  will-change: left,top,width,height,opacity,border-radius;
+  transition: opacity .2s ease;
+  background: var(--bg-stage-grid);
+  box-shadow: 0 22px 54px rgba(0,0,0,.30);
+}
+
+.stageModeGhostShade {
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: min(330px,48%);
+  pointer-events: none;
+  opacity: 0;
+  background-color: var(--bg-stage-grid);
+  -webkit-mask-image: linear-gradient(to top,rgba(0,0,0,.94) 0%,rgba(0,0,0,.80) 22%,rgba(0,0,0,.58) 46%,rgba(0,0,0,.28) 72%,transparent 100%);
+  mask-image: linear-gradient(to top,rgba(0,0,0,.94) 0%,rgba(0,0,0,.80) 22%,rgba(0,0,0,.58) 46%,rgba(0,0,0,.28) 72%,transparent 100%);
+  will-change: opacity,background-color;
+  transition: background-color .8s cubic-bezier(.25,.46,.45,.94);
+}
+
+.stageTitleGhost {
+  position: absolute;
+  z-index: 20;
+  display: block;
+  max-width: none;
+  overflow: visible;
+  pointer-events: none;
+  font-family: "Microsoft YaHei","PingFang SC","Hiragino Sans GB","Noto Sans SC",system-ui,sans-serif;
+  font-weight: 700;
+  -webkit-text-stroke: 2px var(--outline-stroke);
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  transform: translate3d(0,32px,0);
+  opacity: 0;
+  will-change: transform,opacity,clip-path;
+}
+
+.stageTitleGhost .heroTitleLine {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: visible;
+  transform: translateX(var(--line-shift,0px));
+}
+
+.stageDraftHintGhost,.stageDraftBrandGhost {
+  position: absolute;
+  z-index: 24;
+  display: block;
+  margin: 0;
+  padding: 0;
+  pointer-events: none;
+  overflow: visible;
+  white-space: nowrap;
+  will-change: transform,opacity,color;
+}
+
+.stageDraftHintGhost .heroDraftHintAccent,.stageDraftBrandGhost span {
+  color: var(--accent);
+  transition: color .8s cubic-bezier(.25,.46,.45,.94);
+}
+
+.stage.gridMode.stageMeasureSingleTitle #heroTitle,.stage.stageModeAnimatingToSingle.stageMeasureSingleTitle #heroTitle,.stage.stageMeasureSingleTitle #heroTitle {
+  position: static;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(var(--title-y,0px));
+}
+
+.stageModeGhost.toGrid {
+  box-shadow: 0 0 0 1px color-mix(in srgb,var(--accent) 48%,transparent),0 0 17px 3px color-mix(in srgb,var(--accent) 29%,transparent),0 22px 54px rgba(0,0,0,.28);
+}
+
+.stageModeGhost img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  display: block;
+  object-fit: cover;
+  filter: contrast(1.04);
+  transform: translateZ(0);
+  border-radius: inherit;
+  background: var(--bg-stage);
+}
+
+.stageModeBtn,.stageCopyBtn,.copyToast {
+  z-index: 21;
+}
+
+.stage.gridMode .eyebrow {
+  transform: translate3d(0,var(--grid-eyebrow-y,132px),0);
+}
+
+.stage:not(.gridMode):not(.stageModeAnimatingToGrid) .eyebrow {
+  transform: translate3d(0,var(--title-drop),0);
+}
+
+.stage.gridMode #heroTitle,.stage.stageModeAnimatingToSingle #heroTitle,.stage.stageModeAnimatingToGrid #heroTitle {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(var(--title-y,0px));
+}
+
+.stage:not(.gridMode):not(.stageModeAnimatingToGrid) #heroTitle {
+  position: static;
+  opacity: 1;
+  pointer-events: none;
+  transform: translateY(var(--title-y,0px));
+}
+
+.stage.isDraftBlank.gridMode .heroBrand {
+  display: none;
+}
+
+.stageModeBtn {
+  position: absolute;
+  right: 214px;
+  bottom: 24px;
+  z-index: 21;
+  width: 54px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 0 6px;
+  text-transform: none;
+  white-space: nowrap;
+  letter-spacing: 0;
+  font-family: "Segoe UI","Arial",system-ui,sans-serif;
+}
+
+.stageModeBtn svg {
+  width: 29px;
+  height: 18px;
+  stroke: currentColor;
+  fill: none;
+  overflow: visible;
+  shape-rendering: geometricPrecision;
+  transform: translateX(1px);
+}
+
+.stageModeBtn .modeIcon {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform .22s cubic-bezier(.22,.61,.36,1),opacity .22s cubic-bezier(.22,.61,.36,1);
+}
+
+.stageModeBtn .singleFrame,.stageModeBtn .gridCell {
+  vector-effect: non-scaling-stroke;
+  transition: stroke-width .22s cubic-bezier(.22,.61,.36,1),stroke .8s cubic-bezier(.25,.46,.45,.94),fill .8s cubic-bezier(.25,.46,.45,.94);
+  stroke: currentColor;
+  stroke-width: 1.34;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.stageModeBtn #stageModeLabel {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.stageModeBtn[aria-pressed="false"] .modeSingle {
+  opacity: 1;
+  transform: translateX(0) scale(1.04);
+}
+
+.stageModeBtn[aria-pressed="false"] .modeGrid {
+  opacity: .34;
+  transform: translateX(1.6px) scale(.82);
+}
+
+.stageModeBtn[aria-pressed="false"] .singleFrame {
+  stroke-width: 1.7;
+}
+
+.stageModeBtn[aria-pressed="false"] .gridCell {
+  stroke-width: 1.08;
+}
+
+.stageModeBtn[aria-pressed="true"] .modeSingle {
+  opacity: .34;
+  transform: translateX(-1.6px) scale(.82);
+}
+
+.stageModeBtn[aria-pressed="true"] .modeGrid {
+  opacity: 1;
+  transform: translateX(0) scale(1.04);
+}
+
+.stageModeBtn[aria-pressed="true"] .singleFrame {
+  stroke-width: 1.12;
+}
+
+.stageModeBtn[aria-pressed="true"] .gridCell {
+  stroke-width: 1.52;
+}
+

@@ -1,0 +1,258 @@
+/* ── Inline project order editor ── */
+
+.numEditZone {
+  display: inline-flex;
+  align-items: center;
+  width: max-content;
+  min-width: 50px;
+  height: 14px;
+  line-height: 14px;
+  overflow: visible;
+  position: relative;
+}
+
+.numValue {
+  display: inline-block;
+  min-width: 16px;
+  white-space: nowrap;
+}
+
+.orderEditBtn {
+  width: 14px;
+  height: 14px;
+  min-width: 14px;
+  margin: 0 0 0 4px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: var(--text-muted);
+  border: 0;
+  border-radius: 2px;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translate3d(-2px,0,0);
+  transition: opacity .12s ease,visibility 0s linear .12s,transform .16s cubic-bezier(.25,.46,.45,.94),color .14s ease,background-color .14s ease;
+}
+
+.orderEditBtn svg {
+  width: 14px;
+  height: 14px;
+  display: block;
+  overflow: visible;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  shape-rendering: geometricPrecision;
+}
+
+.numEditZone:hover .orderEditBtn,.orderEditBtn:focus-visible,.item.on .orderEditBtn {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translate3d(0,0,0);
+  transition-delay: 0s;
+}
+
+.item.on .orderEditBtn {
+  color: var(--text-muted);
+  opacity: .72;
+}
+
+.orderEditBtn:hover,.orderEditBtn:focus-visible,.item.on .numEditZone .orderEditBtn:hover {
+  color: var(--accent);
+  opacity: 1;
+  background: color-mix(in srgb,var(--accent) 8%,transparent);
+  outline: 0;
+}
+
+.numEditZone.editing .orderEditBtn {
+  display: none;
+}
+
+.orderInput {
+  width: 44px;
+  height: 16px;
+  min-height: 16px;
+  margin: 0;
+  padding: 0 1px;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid color-mix(in srgb,var(--accent) 70%,transparent);
+  border-radius: 0;
+  box-shadow: none;
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 15px;
+  letter-spacing: .08em;
+  caret-color: var(--accent);
+  outline: 0;
+  animation: none;
+  transition: border-color .18s ease;
+}
+
+.orderInput:focus {
+  border-bottom-color: var(--accent);
+  box-shadow: none;
+  animation: none;
+}
+
+/* ── Long-press project reordering ── */
+
+.item img {
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+body.listDragActive {
+  user-select: none;
+  cursor: grabbing;
+}
+
+.list.isListDragging {
+  scroll-behavior: auto;
+}
+
+.item.listDragSource {
+  opacity: .22;
+  filter: saturate(.65);
+  background: color-mix(in srgb,var(--accent) 5%,var(--bg-hover));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb,var(--accent) 35%,transparent);
+  cursor: grabbing;
+}
+
+.listDragGhost {
+  position: fixed;
+  z-index: 10020;
+  margin: 0;
+  pointer-events: none;
+  opacity: .96;
+  background: var(--bg-side);
+  border-bottom-color: transparent;
+  cursor: grabbing;
+  will-change: transform;
+  transform-origin: center;
+  transition: box-shadow .18s ease,opacity .18s ease;
+  overflow: visible;
+  box-shadow: 0 16px 36px rgba(0,0,0,.34);
+  display: grid;
+  grid-template-columns: 82px minmax(0,1fr);
+  gap: 12px;
+  padding: 12px;
+  height: 108px;
+  min-height: 108px;
+  align-items: stretch;
+}
+
+.listDragGhost .orderEditBtn {
+  display: none;
+}
+
+/* ── Project list geometry and drag-selection guard ── */
+
+.list,.list * {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.list img,.list a {
+  -webkit-user-drag: none;
+}
+
+.list .orderInput,.list .orderInput * {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* ── Long-press selection with frame-only lift ── */
+
+/* Keep every pixel of the thumbnail and labels at its original size while the
+   dragged copy moves. Only the independent outside frame expands slightly. */
+
+.listDragGhost::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  box-sizing: border-box;
+  border: 1px solid color-mix(in srgb,var(--accent) 68%,transparent);
+  border-radius: 1px;
+  box-shadow: 0 0 0 1px color-mix(in srgb,var(--accent) 12%,transparent),0 0 15px 2px color-mix(in srgb,var(--accent) 19%,transparent);
+  opacity: .72;
+  pointer-events: none;
+  will-change: inset,opacity,box-shadow;
+  animation: listDragFrameLift .24s cubic-bezier(.2,.82,.25,1) forwards;
+}
+
+@keyframes listDragFrameLift {
+  from {
+    inset: 0;
+    opacity: .72;
+    box-shadow: 0 0 0 1px color-mix(in srgb,var(--accent) 8%,transparent),0 0 7px 1px color-mix(in srgb,var(--accent) 10%,transparent);
+  }
+
+  to {
+    inset: -3px;
+    opacity: 1;
+    box-shadow: 0 0 0 1px color-mix(in srgb,var(--accent) 14%,transparent),0 0 17px 3px color-mix(in srgb,var(--accent) 22%,transparent);
+  }
+}
+
+/* The floating clone lives outside #list, so explicitly mirror the source
+   card's final project-card geometry instead of falling back to the older 76px rules. */
+
+.listDragGhost .thumb {
+  width: 82px;
+  height: 82px;
+  align-self: auto;
+}
+
+.listDragGhost .entryBody {
+  height: 82px;
+  overflow: hidden;
+  justify-content: flex-start;
+}
+
+.listDragGhost .num {
+  height: 14px;
+  min-height: 14px;
+  line-height: 14px;
+  flex: 0 0 14px;
+}
+
+.listDragGhost h3 {
+  display: block;
+  height: 23px;
+  min-height: 23px;
+  flex: 0 0 23px;
+  margin: 3px 0 0;
+  padding: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 23px;
+}
+
+.listDragGhost .metaPills {
+  height: 17px;
+  min-height: 17px;
+  flex: 0 0 17px;
+  margin-top: 3px;
+}
+
+.listDragGhost .modelName {
+  height: 17px;
+}
+
+.listDragGhost .itemMode {
+  height: 17px;
+  min-height: 17px;
+  flex: 0 0 17px;
+  margin-top: 3px;
+}

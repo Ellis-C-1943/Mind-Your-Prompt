@@ -1,0 +1,21 @@
+RUNTIME/
+DATA/prompts.json
+DATA/prompts.json.bak
+DATA/prompts.corrupt-*.json
+DATA/images/*
+!DATA/.gitkeep
+!DATA/images/.gitkeep
+*.log
+*.tmp
+*.temp
+~$*
+Mind-Your-Prompt-v*.zip
+Start MYP.exe
+SHA256SUMS.txt
+.DS_Store
+Thumbs.db
+desktop.ini
+Desktop.ini
+$RECYCLE.BIN/
+.vscode/
+.idea/

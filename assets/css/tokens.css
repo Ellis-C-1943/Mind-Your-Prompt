@@ -1,0 +1,240 @@
+@property --bg-input {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #0c0c0c;
+}
+
+@property --bg-surface {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #0b0b0b;
+}
+
+@property --bg {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #050505;
+}
+
+@property --bg-side {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #080808;
+}
+
+@property --bg-stage {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #090909;
+}
+
+@property --bg-stage-grid {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #090909;
+}
+
+@property --bg-hover {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #101010;
+}
+
+@property --bg-ghost {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #121212;
+}
+
+@property --bg-card {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #0c0c0c;
+}
+
+@property --bg-dropdown {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #141414;
+}
+
+@property --border {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #171717;
+}
+
+@property --border-light {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #222222;
+}
+
+@property --border-input {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #333333;
+}
+
+@property --border-item {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #161616;
+}
+
+@property --border-media {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #242424;
+}
+
+@property --text {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #fafafa;
+}
+
+@property --text-muted {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #888888;
+}
+
+@property --text-subtle {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #777777;
+}
+
+@property --accent {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #d4ff00;
+}
+
+@property --scroll-track {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #0c0c0c;
+}
+
+@property --scroll-thumb {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #3a3a3a;
+}
+
+@property --grid-scroll-thumb {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(250,250,250,.26);
+}
+
+@property --bg-gradient-bottom {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(5,5,5,.82);
+}
+
+@property --bg-gradient-mid {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(5,5,5,.62);
+}
+
+@property --bg-gradient-top {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgba(5,5,5,.24);
+}
+
+@property --outline-stroke {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #ffffff;
+}
+
+/* Theme variables */
+
+:root,[data-theme="dark"] {
+  --bg: #050505;
+  --bg-side: #080808;
+  --bg-stage: #090909;
+  --bg-stage-grid: #090909;
+  --bg-card: #0c0c0c;
+  --bg-input: #0c0c0c;
+  --scroll-track: #0c0c0c;
+  --scroll-thumb: #3a3a3a;
+  --grid-scroll-thumb: rgba(250,250,250,.26);
+  --bg-hover: #101010;
+  --bg-surface: #0b0b0b;
+  --bg-ghost: #121212;
+  --bg-dropdown: #141414;
+  --bg-dropdown-hover: #1a1a1a;
+  --border: #171717;
+  --border-light: #222;
+  --border-input: #333;
+  --border-item: #161616;
+  --border-media: #242424;
+  --text: #fafafa;
+  --text-muted: #888;
+  --text-subtle: #777;
+  --accent: #d4ff00;
+  --accent-dark: #d4ff00;
+  --accent-light: #96C93B;
+  --outline-stroke: #ffffff;
+  --bg-gradient-bottom: rgba(5,5,5,.82);
+  --bg-gradient-mid: rgba(5,5,5,.62);
+  --bg-gradient-top: rgba(5,5,5,.24);
+  --upload-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 772 643'%3E%3Crect x='27' y='27' width='718' height='589' rx='70' fill='none' stroke='%23686868' stroke-width='34'/%3E%3Ccircle cx='205' cy='190' r='58' fill='%23686868'/%3E%3Cpath d='M78 474 205 342c8-8 21-8 29 0l87 87 172-190c8-9 22-9 30 0l171 183v124c0 12-10 22-22 22H100c-12 0-22-10-22-22z' fill='%23686868'/%3E%3C/svg%3E");
+}
+
+[data-theme="light"] {
+  --bg: #F5F3ED;
+  --bg-side: #f0ede6;
+  --bg-stage: #F5F3ED;
+  --bg-stage-grid: #FCFBF8;
+  --bg-card: #e8e5de;
+  --bg-input: #faf8f4;
+  --scroll-track: #faf8f4;
+  --scroll-thumb: #3a3a3a;
+  --grid-scroll-thumb: rgba(26,26,26,.26);
+  --bg-hover: #e0ddd6;
+  --bg-surface: #ece9e2;
+  --bg-ghost: #e0ddd6;
+  --bg-dropdown: #faf8f4;
+  --bg-dropdown-hover: #e8e5de;
+  --border: #e0e0e0;
+  --border-light: #d0d0d0;
+  --border-input: #c0c0c0;
+  --border-item: #e8e8e8;
+  --border-media: #d0d0d0;
+  --text: #1a1a1a;
+  --text-muted: #666;
+  --text-subtle: #999;
+  --accent: #96C93B;
+  --accent-dark: #d4ff00;
+  --accent-light: #96C93B;
+  --outline-stroke: #0A0C12;
+  --bg-gradient-bottom: rgba(245,243,237,.92);
+  --bg-gradient-mid: rgba(245,243,237,.72);
+  --bg-gradient-top: rgba(245,243,237,.34);
+}
+
+[data-theme] {
+  transition: none;
+}
+
+/* Broad theme interpolation is enabled only during an actual theme change.
+   Keeping it active permanently made every mode/class update recalculate transitions
+   across the full DOM and contributed to dropped frames. */
+
+html.themeAnimating,html.themeAnimating * {
+  transition: background-color .8s cubic-bezier(.25,.46,.45,.94),border-color .8s cubic-bezier(.25,.46,.45,.94),color .8s cubic-bezier(.25,.46,.45,.94),box-shadow .8s cubic-bezier(.25,.46,.45,.94),fill .8s cubic-bezier(.25,.46,.45,.94),stroke .8s cubic-bezier(.25,.46,.45,.94);
+}
+
+* {
+  box-sizing: border-box;
+  scrollbar-color: var(--scroll-thumb) var(--scroll-track);
+  scrollbar-width: thin;
+}

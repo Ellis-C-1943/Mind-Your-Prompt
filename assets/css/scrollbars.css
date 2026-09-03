@@ -1,0 +1,215 @@
+/* Bottom soft separators: left list + grid canvas */
+
+.sideBottom::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -82px;
+  height: 82px;
+  pointer-events: none;
+  background-color: var(--bg-side);
+  -webkit-backdrop-filter: blur(12px) saturate(1.02);
+  backdrop-filter: blur(12px) saturate(1.02);
+  -webkit-mask-image: linear-gradient(to bottom,transparent 0%,rgba(0,0,0,.28) 20%,rgba(0,0,0,.78) 62%,rgba(0,0,0,1) 100%);
+  mask-image: linear-gradient(to bottom,transparent 0%,rgba(0,0,0,.28) 20%,rgba(0,0,0,.78) 62%,rgba(0,0,0,1) 100%);
+  will-change: background-color,-webkit-backdrop-filter,backdrop-filter,opacity;
+  opacity: 1;
+  transition: background-color .8s cubic-bezier(.25,.46,.45,.94),-webkit-backdrop-filter .8s cubic-bezier(.25,.46,.45,.94),backdrop-filter .8s cubic-bezier(.25,.46,.45,.94),opacity .24s cubic-bezier(.25,.46,.45,.94);
+}
+
+.sideBottom::after {
+  content: none;
+  display: none;
+}
+
+.side.list-scroll-active.list-scroll-bottom .sideBottom::before {
+  opacity: 0;
+  transition: background-color .8s cubic-bezier(.25,.46,.45,.94),-webkit-backdrop-filter .8s cubic-bezier(.25,.46,.45,.94),backdrop-filter .8s cubic-bezier(.25,.46,.45,.94),opacity .24s cubic-bezier(.25,.46,.45,.94);
+}
+
+.sideStats,#newBtn {
+  position: relative;
+  z-index: 1;
+}
+
+/* Scrollbar transition sync */
+
+.list::-webkit-scrollbar-track,.stageGridView::-webkit-scrollbar-track,.prompt::-webkit-scrollbar-track {
+  transition: background-color .8s cubic-bezier(.25,.46,.45,.94),border-color .8s cubic-bezier(.25,.46,.45,.94);
+}
+
+.list::-webkit-scrollbar-thumb,.stageGridView::-webkit-scrollbar-thumb,.prompt::-webkit-scrollbar-thumb {
+  transition: background-color .8s cubic-bezier(.25,.46,.45,.94),border-color .8s cubic-bezier(.25,.46,.45,.94),box-shadow .8s cubic-bezier(.25,.46,.45,.94);
+}
+
+.prompt::-webkit-scrollbar-track {
+  background: var(--scroll-track);
+  border-radius: 999px;
+}
+
+.prompt::-webkit-scrollbar-thumb {
+  background: var(--scroll-thumb);
+  border: 2px solid var(--scroll-track);
+  border-radius: 999px;
+  background-clip: padding-box;
+}
+
+/* ── Unified overlay scrollbars: arrows and thumb share one rail ── */
+
+.customScrollTarget {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.customScrollTarget::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.customScrollbar {
+  position: absolute;
+  z-index: 30;
+  width: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  color: var(--grid-scroll-thumb);
+  transition: opacity .22s ease,visibility 0s linear .22s,color .8s cubic-bezier(.25,.46,.45,.94);
+  contain: layout style paint;
+}
+
+.customScrollbar.isScrollable {
+  opacity: .92;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity .22s ease,visibility 0s linear 0s,color .8s cubic-bezier(.25,.46,.45,.94);
+}
+
+.customScrollbar.promptScrollbar {
+  width: 11px;
+  color: var(--grid-scroll-thumb);
+}
+
+.customScrollbar.listScrollbar {
+  width: 14px;
+}
+
+.customScrollbar.gridScrollbar {
+  width: 14px;
+}
+
+.customScrollbarControls {
+  flex: 0 0 31px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1px;
+}
+
+.customScrollbarButton {
+  width: 14px;
+  height: 14px;
+  min-height: 14px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  color: inherit;
+  box-shadow: none;
+  opacity: .88;
+  transition: opacity .18s ease,color .8s cubic-bezier(.25,.46,.45,.94),transform .18s ease;
+}
+
+.customScrollbarButton:hover {
+  color: var(--accent);
+  opacity: 1;
+  transform: scale(1.12);
+}
+
+.customScrollbarButton:active {
+  transform: scale(.9);
+}
+
+.customScrollbarButton svg {
+  width: 11px;
+  height: 11px;
+  display: block;
+  overflow: visible;
+}
+
+.customScrollbarButton[data-dir="1"] svg {
+  transform: rotate(180deg);
+}
+
+.customScrollbarButton path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.35;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.customScrollbarTrack {
+  position: relative;
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 0;
+  background: transparent;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.customScrollbarThumb {
+  position: absolute;
+  left: 3px;
+  right: 3px;
+  top: 0;
+  min-height: 28px;
+  border-radius: 999px;
+  background-color: currentColor;
+  opacity: .92;
+  cursor: grab;
+  transform: translate3d(0,0,0);
+  will-change: transform,height,background-color;
+  transition: background-color .8s cubic-bezier(.25,.46,.45,.94),opacity .18s ease,box-shadow .18s ease;
+}
+
+.customScrollbar.promptScrollbar .customScrollbarThumb {
+  left: 2px;
+  right: 2px;
+}
+
+.customScrollbarThumb:hover {
+  background-color: var(--accent);
+  opacity: 1;
+  box-shadow: 0 0 8px color-mix(in srgb,var(--accent) 28%,transparent);
+}
+
+.customScrollbarThumb.isDragging {
+  cursor: grabbing;
+  opacity: 1;
+}
+
+.stageEyebrowGhost {
+  position: absolute;
+  z-index: 24;
+  pointer-events: none;
+  margin: 0;
+  font-family: "Segoe UI","Arial",system-ui,sans-serif;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--accent);
+  will-change: transform,opacity,color;
+  transition: color .8s cubic-bezier(.25,.46,.45,.94);
+}
+

@@ -1,0 +1,24 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  windows-validation:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Validate project and local server
+        shell: powershell
+        run: .\tools\Test-Project.ps1 -RunServerSmoke -RunBrowserSmoke
+
+      - name: Compile launcher from source
+        shell: powershell
+        run: .\launcher\Build-Launcher.ps1 -OutputPath "$env:RUNNER_TEMP\Start MYP.exe"
