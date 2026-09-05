@@ -2,7 +2,7 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
-MYP is a local-first Windows prompt manager for AIGC image workflows. When it is started through the included local service, the interface runs in a browser while prompts and images remain inside the application's `DATA` directory. Opening `index.html` directly instead uses that browser's IndexedDB.
+MYP is a local prompt manager I built for my own AIGC image workflow. I wanted one place to keep prompts, model names, source images, and generated results together instead of scattering them across folders and notes. It is designed for Windows and keeps the working data local.
 
 <!-- github-screenshots:start -->
 ## Screenshots
@@ -14,20 +14,20 @@ MYP is a local-first Windows prompt manager for AIGC image workflows. When it is
 
 ## Features
 
-- Manage titles, model names, prompts, source images, and generated images.
-- Single-image and adaptive grid preview modes.
-- Search, text-to-image/image-to-image filters, drag reordering, and order-number swaps.
-- Image lightbox, downloads, and prompt copy.
+- Manage prompt titles, model names, prompts, source images, and generated images in one place.
+- Switch between single-image and adaptive grid previews.
+- Search and filter text-to-image / image-to-image entries.
+- Reorder items by dragging or swapping order numbers.
+- Preview images in a lightbox, download images, and copy prompts quickly.
 - Dark/light themes, accent colors, and Chinese/English UI.
-- No account, cloud backend, external font request, or third-party runtime dependency.
-- IndexedDB fallback when `index.html` is opened without the local server.
-- Serialized, revision-checked saves and transactional prompt/image deletion.
+- Local storage with no account or cloud backend required.
+- Browser-only IndexedDB fallback when `index.html` is opened directly.
 
 ## Download
 
-For normal use, download the versioned `Mind-Your-Prompt-vX.Y.Z-Windows.zip` from GitHub Releases, extract the complete archive to a writable folder, and then double-click `Start MYP.exe`. Do not run the application from inside the ZIP.
+For normal use, download the versioned `Mind-Your-Prompt-vX.Y.Z-Windows.zip` from GitHub Releases, extract the archive to a writable folder, and double-click `Start MYP.exe`. Do not run the application from inside the ZIP.
 
-The `Mind-Your-Prompt-vX.Y.Z-Code.zip` package is intended for publishing the source tree to GitHub, source review, and development. It contains CI configuration, tests, developer documentation, and the full-resolution light/dark screenshots, but intentionally excludes generated executables and all user data.
+The `Mind-Your-Prompt-vX.Y.Z-Code.zip` package is the source package for review and development. It does not include the generated EXE or user data.
 
 ## Requirements
 
@@ -39,9 +39,9 @@ The `Mind-Your-Prompt-vX.Y.Z-Code.zip` package is intended for publishing the so
 
 ### Preferred (Release package): `Start MYP.exe`
 
-Double-click `Start MYP.exe` in the project root. It only launches the local PowerShell service without a visible console window. Its source is `launcher/StartMYP.cs`.
+Double-click `Start MYP.exe` in the project root. It launches the local PowerShell service without leaving a visible console window. The launcher source is in `launcher/StartMYP.cs`.
 
-The executable is not commercially code-signed, so Windows may show a SmartScreen notice on first launch. Delete it and use the script entry point below if unsigned executables are unacceptable in your environment.
+The executable is not commercially code-signed, so Windows may show a SmartScreen notice on first launch. If you prefer not to run an unsigned EXE, use the script entry point below.
 
 The Code package does not include the generated EXE. Use the script entry point below, or build the launcher with `launcher/Build-Launcher.ps1`.
 
@@ -55,7 +55,7 @@ Double-click the batch file to start the same local service.
 powershell.exe -ExecutionPolicy Bypass -NoProfile -File .\server\MYP.ps1
 ```
 
-The service binds only to `127.0.0.1` on ports `47350–47370` and remains available while an MYP tab is open, including when that tab is backgrounded or idle. After the last MYP tab closes, the service exits after a 10-second grace period; reloading or reopening MYP during that period cancels the shutdown.
+The service binds only to `127.0.0.1` on ports `47350–47370`. It stays available while an MYP tab is open and shuts down shortly after the last MYP tab is closed.
 
 ## Data and backup
 
@@ -64,26 +64,21 @@ When MYP runs through the local service:
 - Prompts: `DATA/prompts.json`
 - Previous automatic backup: `DATA/prompts.json.bak`
 - Images: `DATA/images/`
-- Ephemeral runtime files: `RUNTIME/`
+- Temporary runtime files: `RUNTIME/`
 
-Prompt saves are serialized in the browser and checked against a content revision so stale tabs cannot silently overwrite newer data. Each save uses a same-directory temporary file and prefers an atomic replacement. On filesystems where `File.Replace` is unavailable, MYP falls back to a compatible backup-then-overwrite path. Image deletion and the matching prompt update are committed through one reversible server transaction; interrupted uncommitted deletions are recovered from `RUNTIME/transactions` at the next start.
-
-If the main database is invalid, MYP serves a valid `.bak` without deleting the original; the next successful save preserves the damaged file as `prompts.corrupt-timestamp.json`. Legacy UTF-8 BOM files and older records without grid-order fields remain readable.
-
-Copy the complete `DATA` directory for backup or migration. This remains the complete portable backup: no user content was moved into `RUNTIME` or another location. Do not manually edit `prompts.json` while MYP is saving.
+Copy the complete `DATA` directory to back up or move your prompt library. MYP also includes save-conflict checks, automatic backup, and recovery handling for interrupted writes or deletions.
 
 Opening `index.html` directly stores data in that browser's IndexedDB. Browser-only data is separate from the project-folder data and is not synchronized automatically.
 
-## Local security boundary
+For implementation details, see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
-- Listener restricted to `127.0.0.1`; no LAN or internet binding.
-- Mutation endpoints require a random per-launch session token, same-origin request metadata, and JSON content type.
-- No CORS permission is emitted; the page also receives CSP and related browser security headers.
-- Request sizes, image types, revisions, and filesystem paths are validated.
-- JPG/JPEG/PNG only, 80 MB per image, with file-signature validation.
-- Path resolution restricted to the project tree and `DATA/images`.
+## Local security
 
-See [SECURITY.md](SECURITY.md) for the complete model.
+- The local service binds only to `127.0.0.1`, not the LAN or internet.
+- User data remains in the local project directory.
+- Upload types, request sizes, and filesystem paths are validated.
+
+See [SECURITY.md](SECURITY.md) for the full security model.
 
 ## Code package layout
 
@@ -117,19 +112,19 @@ Static validation:
 powershell.exe -ExecutionPolicy Bypass -NoProfile -File .\tools\Test-Project.ps1
 ```
 
-Validation plus the real local-server smoke test:
+Validation plus the local-server smoke test:
 
 ```powershell
 powershell.exe -ExecutionPolicy Bypass -NoProfile -File .\tools\Test-Project.ps1 -RunServerSmoke
 ```
 
-Validation plus the browser interaction/regression suite:
+Browser interaction/regression suite:
 
 ```powershell
 powershell.exe -ExecutionPolicy Bypass -NoProfile -File .\tools\Test-Project.ps1 -RunBrowserSmoke
 ```
 
-Release-level validation runs both suites:
+Release-level validation:
 
 ```powershell
 powershell.exe -ExecutionPolicy Bypass -NoProfile -File .\tools\Test-Project.ps1 -RunServerSmoke -RunBrowserSmoke
@@ -141,7 +136,7 @@ Build a release:
 powershell.exe -ExecutionPolicy Bypass -NoProfile -File .\tools\Build-Release.ps1
 ```
 
-The release script rebuilds the launcher in a temporary staging directory, runs server and browser regressions, excludes user data from the package, and generates `SHA256SUMS.txt`. It does not delete user data from the working directory.
+The release script rebuilds the launcher, runs the server and browser regressions, excludes user data from the package, and generates `SHA256SUMS.txt`.
 
 ## License
 
